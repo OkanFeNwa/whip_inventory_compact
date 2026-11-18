@@ -10,7 +10,9 @@ All notable changes to this resource are documented here. The format follows
 - Renamed the resource from `whip_inventory_skin` to **`whip_inventory_compact`**.
   `server.cfg` and `whip_core/config.lua` were updated to match.
 - `README.md` is now the full English documentation; the Italian version moved to
-  `README.it.md` and the redundant `README.en.md` was removed.
+  `README.it.md` and the redundant `README.en.md` was removed. Its structure follows
+  the `whip_clothingwheel` README (Installation, Languages, How to use, Files, Events,
+  Configuration), adapted to a CSS-only skin.
 - Installation docs no longer assume the `[custom]` folder: the resource can live
   in any directory under `resources/`.
 
