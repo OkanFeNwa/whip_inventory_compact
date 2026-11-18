@@ -5,7 +5,7 @@ Slots, Drag & Drop, Tooltips, Menüs, Gewichte und die serverseitige Validierung
 fügt nur ein `theme.css`, ein kleines `client.lua` gegen den Spiel-Blur und einen
 Sprachumschalter mit einer Zeile hinzu.
 
-Die vollständige italienische Dokumentation und alle Prüfungen stehen in [README.md](README.md).
+Die vollständige Dokumentation auf Englisch und alle Prüfungen stehen in [README.md](README.md).
 
 ## Funktionen
 
@@ -32,7 +32,14 @@ alle anderen Inventartexte gehören zu `whip_core` und lassen sich per CSS-Theme
 
 ## Installation
 
-Den Ordner nach `resources/[custom]/whip_inventory_compact/` kopieren und
+Der Ordner kann in **beliebigem Verzeichnis unter `resources/`** liegen (`[custom]`, `[core]`,
+direkt in `resources/` oder einer anderen Kategorie). Nur der Ordnername und die Abhängigkeit von
+`whip_core` sind wichtig:
+
+```
+resources/<beliebiger-ordner>/whip_inventory_compact/
+```
+
 `ensure whip_inventory_compact` in die `server.cfg` schreiben oder über txAdmin starten.
 `whip_core` wird benötigt. Bestehende Serverdateien müssen nicht bearbeitet werden.
 

@@ -9,7 +9,7 @@
 local RESOURCE = GetCurrentResourceName()
 
 local function writeActiveLocaleCss()
-    local root = GetResourcePath(RESOURCE) or ('resources/[custom]/' .. RESOURCE)
+    local root = GetResourcePath(RESOURCE) or ('resources/' .. RESOURCE)
     local path = ('%s/locales/active.css'):format(root)
     local q = InventorySkin.cssString
 

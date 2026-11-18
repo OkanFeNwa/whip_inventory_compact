@@ -5,7 +5,7 @@ les slots, le glisser-déposer, les infobulles, les menus, les poids et la valid
 ressource ajoute seulement un `theme.css`, un petit `client.lua` qui annule le flou du jeu et un
 sélecteur de langue en une ligne.
 
-Voir [README.md](README.md) pour la documentation complète en italien et les vérifications.
+Voir [README.md](README.md) pour la documentation complète en anglais et les vérifications.
 
 ## Fonctionnalités
 
@@ -32,9 +32,16 @@ appartiennent à `whip_core` et un thème CSS ne peut pas les modifier.
 
 ## Installation
 
-Copiez le dossier dans `resources/[custom]/whip_inventory_compact/` et ajoutez
-`ensure whip_inventory_compact` à `server.cfg`, ou démarrez-le depuis txAdmin. `whip_core` est requis.
-Aucun fichier existant du serveur n'est à modifier.
+Le dossier peut se trouver dans **n'importe quel répertoire sous `resources/`** (`[custom]`,
+`[core]`, la racine de `resources/` ou une autre catégorie). Seuls le nom du dossier et la
+dépendance envers `whip_core` comptent :
+
+```
+resources/<n-importe-quel-dossier>/whip_inventory_compact/
+```
+
+Ajoutez `ensure whip_inventory_compact` à `server.cfg`, ou démarrez-le depuis txAdmin.
+`whip_core` est requis. Aucun fichier existant du serveur n'est à modifier.
 
 | Commande | Effet |
 |---|---|

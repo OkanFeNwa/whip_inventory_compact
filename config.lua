@@ -1,9 +1,9 @@
 -- =============================================================================
--- Lingua della skin.
+-- Skin language.
 --
--- Cambia SOLO questa riga: it, en, es, fr, de. Poi fai
--- `restart whip_inventory_compact`: server.lua riscrive locales/active.css e il
--- tema ricarica le etichette. Il fallback è en, poi it, poi la chiave stessa.
+-- Change ONLY this line: it, en, es, fr, de. Then run
+-- `restart whip_inventory_compact`: server.lua rewrites locales/active.css and the
+-- theme reloads the labels. Fallback is en, then it, then the key itself.
 -- =============================================================================
 
 Config = Config or {}

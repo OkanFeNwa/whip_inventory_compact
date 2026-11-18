@@ -1,9 +1,9 @@
 -- ============================================
--- Lingue — lo stesso schema di whip_clothingwheel
+-- Languages — same scheme as whip_clothingwheel
 -- ============================================
--- Config.Locale sceglie il blocco in Config.Locales. Se una chiave manca si
--- prova en, poi it, infine si restituisce la chiave stessa (mai una stringa
--- vuota). I segnaposto sono quelli di string.format (%s, %d, ...).
+-- Config.Locale selects the block in Config.Locales. If a key is missing, en is
+-- tried first, then it, and finally the key itself is returned (never an empty
+-- string). Placeholders are string.format's (%s, %d, ...).
 
 InventorySkin = InventorySkin or {}
 
@@ -21,7 +21,7 @@ local function localePath(tbl, key)
     return tbl
 end
 
---- Testo localizzato. `key` usa la notazione con punti, per esempio 'accessory.phone'.
+--- Localized text. `key` uses dot notation, for example 'accessory.phone'.
 function InventorySkin.locale(key, ...)
     local current = localeTable(Config.Locale)
     local value = localePath(current, key)
@@ -41,19 +41,19 @@ function InventorySkin.locale(key, ...)
     return value
 end
 
---- Lingua effettiva: quella configurata se esiste, altrimenti en, altrimenti it.
+--- Effective language: the configured one if it exists, otherwise en, otherwise it.
 function InventorySkin.activeLocale()
     if localeTable(Config.Locale) then return tostring(Config.Locale) end
     if localeTable('en') then return 'en' end
     return 'it'
 end
 
---- Nome display della lingua attiva (per i log).
+--- Display name of the active language (for logs).
 function InventorySkin.localeName()
     return InventorySkin.locale('meta.name')
 end
 
---- Escaping minimo per una stringa CSS tra virgolette singole.
+--- Minimal escaping for a CSS string wrapped in single quotes.
 function InventorySkin.cssString(value)
     local s = tostring(value)
     s = s:gsub('\r', '')

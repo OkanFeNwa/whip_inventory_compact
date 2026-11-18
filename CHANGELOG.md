@@ -9,6 +9,10 @@ All notable changes to this resource are documented here. The format follows
 ### Changed
 - Renamed the resource from `whip_inventory_skin` to **`whip_inventory_compact`**.
   `server.cfg` and `whip_core/config.lua` were updated to match.
+- `README.md` is now the full English documentation; the Italian version moved to
+  `README.it.md` and the redundant `README.en.md` was removed.
+- Installation docs no longer assume the `[custom]` folder: the resource can live
+  in any directory under `resources/`.
 
 ### Added
 - `config.lua` with `Config.Locale` and the five language blocks `it`, `en`,

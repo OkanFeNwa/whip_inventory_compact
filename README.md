@@ -1,169 +1,169 @@
 # whip_inventory_compact — "Tall Twin Columns"
 
-Skin per l'inventario di WHIP. **Non sostituisce il renderer**: `whip_core` continua a disegnare
-slot, drag & drop, tooltip, menu, pesi e validazione lato server. Questa risorsa aggiunge un
-`theme.css` (applicato a tutti tramite `SetActiveTheme`) e un piccolo `client.lua` che annulla il
-blur di gioco mentre l'inventario è aperto. Nessun file esistente è stato modificato.
+A skin for WHIP's inventory. It **does not replace the renderer**: `whip_core` still draws every
+slot, drag & drop, tooltips, menus, weights and server-side validation. This resource only adds a
+`theme.css` (applied to everyone through `SetActiveTheme`) and a small `client.lua` that cancels
+the game blur while the inventory is open. No existing server file has been modified.
 
-Pacchetto pronto per GitHub: licenza MIT, changelog, screenshot e **5 lingue** (IT, EN, ES, FR, DE)
-con lo stesso meccanismo a una riga di `whip_clothingwheel`.
+GitHub-ready package: MIT licence, changelog, screenshots and **5 languages** (IT, EN, ES, FR, DE)
+with the same one-line switch used by `whip_clothingwheel`.
 
-Documentazione: [Italiano](README.md) · [English](README.en.md) · [Español](README.es.md) ·
+Documentation: [Italiano](README.it.md) · [English](README.md) · [Español](README.es.md) ·
 [Français](README.fr.md) · [Deutsch](README.de.md)
 
-## Cosa fa
+## What it does
 
-- **Due colonne della stessa larghezza (420px sullo schermo a 1080p)**, con un margine minimo di
-  24px ai lati e 20px in alto/in basso; l'insieme è centrato verticalmente.
-  - a sinistra **una sola scheda continua**, senza soluzioni di continuità: in cima il nome del
-    player e la capacità di peso (il margine nativo di 14px è stato azzerato, quindi è attaccato
-    al resto), poi i 5 slot accessori (Telefono, Contanti, 3 chiavi) grandi come quelli
-    dell'inventario, un divisore, la griglia del giocatore con gli slot rapidi 1-5 evidenziati,
-    un divisore, la zona **Terra / Nearby** su 2 righe e, in fondo, la **legenda dei tasti**.
-    I divisori sono **linee corte da 1px, centrate e rientrate di 40px per parte** (480px interni
-    su 560px di scheda): niente contorno attorno alla finestra, solo sopra e sotto.
-  - a destra le finestre che WHIP apre per borse, baule, portabagagli o portafoglio: sono
-    **impilate in verticale** (contenitore + portafoglio, per esempio) invece di sovrapporsi,
-    **centrate verticalmente come gruppo** sia con uno sia con più contenitori aperti, con quella
-    aperta per prima in cima (è il primo figlio nel DOM di WHIP). Alte quanto basta ai contenuti,
-    senza spazi vuoti. Niente trascinamento: è solo CSS.
-- **Tutte le griglie hanno 5 colonne per riga**, con slot quadrati da 72px sullo schermo.
-- Il **centro dello schermo resta libero**.
-- Le **ombre pesanti tra i pannelli sono state tolte**: restano solo bordi piatti sottili.
-- **Apertura e chiusura animate**: la finestra sale di 10px e si assesta in 0.26s.
-  Tutto arriva **insieme**: il ritardo nativo di 0.07s sulla barra accessori è stato annullato,
-  quindi telefono/contanti/chiavi non seguono più l'inventario ma entrano con esso, in un unico
-  blocco. La chiusura è animata davvero con `ease-in` su 0.24s (WHIP lascia `.open` per 250ms).
-  **Nessun tremolio**: (1) l'overlay non sfida più insieme alla finestra — scatta a opacità 1 e
-  l'unica fade è quella del guscio; (2) il `scale()` è stato rimosso: su un elemento con
-  `zoom:0.75` ridisegnava slot e testo a pixel frazionari; (3) l'easing è `--skin-ease`
-  (`cubic-bezier(.25,.8,.25,1)`) invece dell'`--ui-ease` di WHIP, che faceva fare il 60% del
-  movimento nel primo frame.
-- **Nessuno scurimento dello schermo**: il `#inv-wash` viene forzato a `background: transparent`
-  (vince anche sul colore inline scritto da `inventory.js`), verificato con `getComputedStyle`.
-- **Comparsa dei contenitori animata**: pannelli di borse/baule/portafoglio entrano con
-  `skinPanelIn` (0.26s, sale di 8px e si assesta, senza `scale`), anche quando vengono aperti a
-  inventario già visibile.
-- Il **tooltip dell'oggetto è più grande**: 285×96px sullo schermo invece di 225×80px, con testo
-  20/15/13px interni. Ha una **comparsa animata con ritardo di 0.32s**: se il mouse passa veloce
-  sopra un oggetto non appare, compare solo dopo un istante di permanenza, con un leggero
-  sollevamento. L'animazione sta sull'`.inv-pop` interno, così le coordinate `left/top` scritte da
-  `positionTooltip()` restano intatte. Il `transform` di spostamento è stato **rimosso**: prima
-  spostava la card di `-50%/-100%` *dopo* i clamp nativi, quindi un oggetto vicino al bordo sinistro
-  o alto la mandava fuori schermo. Ora i clamp di WHIP (che leggono la card dopo il ridimensionamento
-  del tema) funzionano di nuovo su tutti e quattro i lati.
-- La **barra rapida di Tab** usa la stessa lingua visiva dell'inventario: superficie scura solida,
-  linee bianche sottili, raggio 14px come i pannelli, nessuna ombra e nessun accento blu. Solo lo
-  stato attivo cambia (bordo/tasto chiaro). Dopo il rilascio di Tab **resta visibile per almeno
-  2 secondi** (2s di attesa + 0.2s di fade): WHIP la nasconde subito alla keyup, quindi il ritardo è
-  sulla transizione dello stato di riposo, lasciando la comparsa immediata. Vale anche quando il
-  segmento è fuso nella barra degli hint. Il comportamento (1-5, conteggi, slot attivo) resta quello
-  di WHIP.
-- **Nomi e etichette leggibili**: WHIP riservava 82px dei 96px interni dello slot al contatore,
-  lasciando al nome 14px (una sola lettera). Ora il nome usa tutto lo spazio fino al contatore e le
-  scritte più lunghe vanno in ellipsis. Le etichette Telefono / Contanti / Chiave 1-3 sono passate
-  da 10px a 15px interni, piene e con contorno scuro; la **legenda dei tasti** da 11px a 15px, con
-  keycap da 14px.
-- Zoom ridotto (`--ui-zoom-inventory: 1` invece di 1.32): molto meno "a tutto schermo".
-- **Nessun blur di sfondo**: WHIP chiama `TriggerScreenblurFadeIn(200)` all'apertura
-  (`whip_core/client/inventory.lua:1062`); essendo una native di FiveM e non CSS, il `theme.css`
-  non può annullarlo. Lo fa quindi il nostro `client.lua`: si registra sugli stessi eventi di rete
-  con cui WHIP apre l'inventario (i nostri handler girano subito dopo i suoi, nello stesso tick,
-  quindi non si vede nemmeno un frame), e intanto controlla l'export pubblico
-  `exports.whip_core:IsInventoryOpen()` (riga 2724) ogni frame per le aperture locali (F2 con
-  cache, radiale, pad). Richiama `TriggerScreenblurFadeOut(1)` solo mentre l'inventario è aperto.
-  Le altre schermate che usano blur restano intatte.
+- **Two columns of equal width (420px on screen at 1080p)**, with a minimum 24px gutter at the
+  sides and 20px at the top and bottom; the whole layout is vertically centred.
+  - On the left, **one single continuous card** with no breaks: the player name and weight
+    capacity at the top (the native 14px margin was removed, so it is attached to the rest), then
+    the 5 accessory slots (Phone, Cash, 3 keys) as large as the inventory slots, a divider, the
+    player grid with quick slots 1–5 highlighted, a divider, the **Ground / Nearby** area on 2 rows
+    and, at the bottom, the **key hints**. The dividers are **short 1px lines, centred and inset
+    40px on each side** (480px internal over a 560px card): no outline around the window, only
+    above and below.
+  - On the right, the windows WHIP opens for bags, trunk, boot or wallet are **stacked vertically**
+    (container + wallet, for example) instead of overlapping, **vertically centred as a group**
+    both with one and with several containers open, with the first one opened on top (it is the
+    first child in WHIP's DOM). They are as tall as their content, with no empty space. No
+    dragging: this is CSS only.
+- **Every grid has 5 columns per row**, with square slots of 72px on screen.
+- The **centre of the screen stays free**.
+- **Heavy shadows between panels were removed**: only thin, flat borders remain.
+- **Animated opening and closing**: the window rises by 10px and settles in 0.26s.
+  Everything arrives **together**: the native 0.07s delay on the accessory bar was removed, so
+  phone/cash/keys no longer lag behind the inventory but enter with it as a single block. Closing
+  is genuinely animated with `ease-in` over 0.24s (WHIP keeps `.open` for 250ms).
+  **No flicker**: (1) the overlay no longer fades together with the window — it snaps to opacity 1
+  and the only fade is the shell's; (2) `scale()` was removed: on an element with `zoom:0.75` it
+  redrew slots and text at fractional pixels; (3) the easing is `--skin-ease`
+  (`cubic-bezier(.25,.8,.25,1)`) instead of WHIP's `--ui-ease`, which performed 60% of the movement
+  in the first frame.
+- **No screen dimming**: `#inv-wash` is forced to `background: transparent` (it also beats the
+  inline colour written by `inventory.js`), verified with `getComputedStyle`.
+- **Animated container arrival**: bag / trunk / wallet panels enter with `skinPanelIn` (0.26s,
+  rising 8px and settling, with no `scale`), even when opened while the inventory is already
+  visible.
+- The **item tooltip is larger**: 285×96px on screen instead of 225×80px, with 20/15/13px
+  internal text. It has an **animated appearance with a 0.32s delay**: if the mouse passes quickly
+  over an item it does not appear; it shows up only after a moment of hovering, with a slight lift.
+  The animation sits on the inner `.inv-pop`, so the `left/top` coordinates written by
+  `positionTooltip()` stay intact. The translation `transform` was **removed**: previously it
+  moved the card by `-50%/-100%` *after* the native clamps, so an item near the left or top edge
+  pushed it off screen. Now WHIP's clamps (which read the card after the theme resize) work again
+  on all four sides.
+- The **Tab hotbar** uses the same visual language as the inventory: solid dark surface, thin white
+  lines, 14px radius like the panels, no shadow and no blue accent. Only the active state changes
+  (lighter border/key). After Tab is released it **stays visible for at least 2 seconds** (2s hold
+  + 0.2s fade): WHIP hides it immediately on keyup, so the delay is on the resting state
+  transition, while the appearance stays immediate. This also applies when the segment is merged
+  into the hint bar. Behaviour (1–5, counts, active slot) remains WHIP's.
+- **Readable names and labels**: WHIP reserved 82px of the slot's 96px internal width for the
+  counter, leaving 14px for the name (a single letter). The name now uses all the space up to the
+  counter and longer strings fall back to ellipsis. The Phone / Cash / Key 1–3 labels went from
+  10px to 15px internal, at full `var(--ui-text)` colour with a dark outline; the **key hints**
+  went from 11px to 15px, with 14px keycaps.
+- Reduced zoom (`--ui-zoom-inventory: 1` instead of 1.32): much less "fullscreen".
+- **No background blur**: WHIP calls `TriggerScreenblurFadeIn(200)` on open
+  (`whip_core/client/inventory.lua:1062`); being a FiveM native and not CSS, `theme.css` cannot
+  cancel it. Our `client.lua` does: it registers on the same net events WHIP uses to open the
+  inventory (our handlers run right after its own, in the same tick, so not even one frame is
+  visible) and, in the meantime, checks the public export `exports.whip_core:IsInventoryOpen()`
+  (line 2724) every frame for local opens (F2 with cache, radial, pad). It calls
+  `TriggerScreenblurFadeOut(1)` only while the inventory is open. Other screens that use blur are
+  untouched.
 
-Nota: WHIP di default nasconde "Nearby" quando apri un contenitore (lo stile inline `display:none`
-viene scritto da `setPanels`). Il tema lo forza a restare visibile. I suoi riquadri sono disegnati
-con un SVG in background che **copia esattamente uno slot vuoto nativo** (96px interni, raggio
-11px, `rgba(255,255,255,.03)`, nessun bordo visibile): sono quindi identici a quelli
-dell'inventario e ci sono anche quando WHIP non rende alcuno slot (scena `stash` con Terra vuota).
-Quando gli slot nativi ci sono, si allineano esattamente sopra.
+Note: by default WHIP hides "Nearby" when a container is opened (the inline `display:none` is
+written by `setPanels`). The theme forces it to stay visible. Its boxes are drawn with a background
+SVG that **copies exactly one empty native slot** (96px internal, 11px radius,
+`rgba(255,255,255,.03)`, no visible border): they are therefore identical to the inventory slots
+and are present even when WHIP renders no slots at all (`stash` scene with an empty Ground area).
+When native slots exist, they line up exactly on top.
 
-Nota sui "tooltip in fondo": li ho letti come **legenda dei tasti** (l'unica barra fissa che WHIP
-disegna), messa in fondo alla scheda sinistra e fusa con essa. In questa versione è anche più
-grande (testo 15px interni, keycap 14px), così si legge senza avvicinarsi allo schermo. Il tooltip
-dell'oggetto resta ancorato al cursore ma, non essendo più traslato, non può più uscire dai bordi.
+Note on the "bottom tooltips": they were read as **key hints** (the only fixed bar WHIP draws),
+placed at the bottom of the left card and merged with it. In this version they are also larger
+(15px internal text, 14px keycaps), so they are readable without leaning into the screen. The item
+tooltip remains anchored to the cursor but, no longer translated, it cannot leave the edges.
 
-## Installazione
+## Installation
 
-La cartella è già qui:
+The folder can live in **any directory under `resources/`** — `[custom]`, `[core]`, directly in
+`resources/`, or another category. Only the folder name and the `whip_core` dependency matter:
 
 ```
-resources/[custom]/whip_inventory_compact/
+resources/<any-folder>/whip_inventory_compact/
 ```
 
-Avvia la risorsa in uno dei due modi:
+Start the resource in either of two ways:
 
-- aggiungi una riga `ensure whip_inventory_compact` in `server.cfg`; **oppure**
-- avviala da txAdmin → Resources → Start.
+- add `ensure whip_inventory_compact` to `server.cfg`; **or**
+- start it from txAdmin → Resources → Start.
 
-All'avvio la risorsa applica da sé il tema a tutti i giocatori connessi. Non serve toccare
-`whip_core/config.lua` né impostare convar.
+At startup the resource applies the theme to everyone already connected. There is no need to edit
+`whip_core/config.lua` or set any convars.
 
-## Lingue (IT / EN / ES / FR / DE)
+## Languages (IT / EN / ES / FR / DE)
 
-Come nella clothingwheel, la lingua si sceglie da **una sola riga** in `config.lua`:
+As in the clothingwheel, the language is chosen from **one single line** in `config.lua`:
 
 ```lua
 Config.Locale = 'it' -- it, en, es, fr, de
 ```
 
-Dopo averla cambiata, esegui `restart whip_inventory_compact`: `server.lua` ricompila
-`locales/active.css` dalle label di `Config.Locales`, e `theme.css` lo importa come prima regola.
-Il client non legge Lua, quindi è questo il ponte tra config e CSS. Il file generato è incluso
-nel repo con i valori italiani: se il server non può scriverlo, la skin resta in italiano e
-stampa un avviso in console invece di rompersi.
+After changing it, run `restart whip_inventory_compact`: `server.lua` recompiles
+`locales/active.css` from the `Config.Locales` labels and `theme.css` imports it as its first rule.
+The client does not read Lua, so this is the bridge between config and CSS. The generated file is
+committed with Italian values: if the server cannot write it, the skin stays in Italian and prints
+a console warning instead of breaking.
 
-| Codice | Lingua | Telefono | Contanti | Chiavi |
+| Code | Language | Phone | Cash | Keys |
 |---|---|---|---|---|
-| `it` | Italiano | Telefono | Contanti | Chiave 1/2/3 |
+| `it` | Italian | Telefono | Contanti | Chiave 1/2/3 |
 | `en` | English | Phone | Cash | Key 1/2/3 |
 | `es` | Español | Teléfono | Efectivo | Llave 1/2/3 |
 | `fr` | Français | Téléphone | Argent | Clé 1/2/3 |
 | `de` | Deutsch | Telefon | Bargeld | Schlüssel 1/2/3 |
 
-`shared/locale.lua` usa la stessa logica della clothingwheel: ricerca con chiavi in notazione
-puntata (`accessory.phone`), fallback `en` → `it` → nome della chiave, e segnaposto
-`string.format` per i messaggi di console. Vengono tradotte le etichette dei 5 slot accessori e i
-messaggi che la risorsa scrive in console. Il resto dei testi dell'inventario (Nearby, legenda,
-nomi degli oggetti) è disegnato da `whip_core` e resta nella sua lingua: non è modificabile da un
-tema CSS senza riscrivere il renderer.
+`shared/locale.lua` uses the same logic as the clothingwheel: dot-path lookup (`accessory.phone`),
+fallback `en` → `it` → key name, and `string.format` placeholders for console messages. Only the
+five accessory labels and this resource's console messages are translated. The rest of the
+inventory text (Nearby, key hints, item names) is drawn by `whip_core` and stays in its own
+language: it cannot be changed by a CSS theme without rewriting the renderer.
 
-## Comandi utili
+## Useful commands
 
-| Comando | Effetto |
+| Command | Effect |
 |---|---|
-| `start whip_inventory_compact` | applica la skin a **tutti** i giocatori connessi (e a chi entra dopo) |
-| `restart whip_inventory_compact` | ricarica `theme.css` e rigenera `locales/active.css` da `config.lua` per **tutti** |
-| `stop whip_inventory_compact` | rimuove l'override e torna all'aspetto base di WHIP |
-| `/whip_theme whip_inventory_compact` | riapplica il link CSS in live **solo a te** (serve `whip.devtools`) |
-| `/whip_theme none` | tolga il tema **solo a te** in live |
+| `start whip_inventory_compact` | applies the skin to **everyone** connected (and to players who join later) |
+| `restart whip_inventory_compact` | reloads `theme.css` and regenerates `locales/active.css` from `config.lua` for **everyone** |
+| `stop whip_inventory_compact` | removes the override and restores WHIP's stock look |
+| `/whip_theme whip_inventory_compact` | reapplies the CSS link live **for you only** (needs `whip.devtools`) |
+| `/whip_theme none` | removes the theme **for you only**, live |
 
-### Chi riceve cosa
+### Who receives what
 
-- **Modifichi `theme.css` sul disco?** Nessuno se ne accorge da solo: il browser ha già il
-  `<link>` caricato. Serve `restart whip_inventory_compact` per tutti, oppure `/whip_theme
-  whip_inventory_compact` per provare solo tu.
-- Richiamare `SetActiveTheme` con lo **stesso** nome non fa nulla: il registro non ribroadcasta
-  un valore identico. Per questo il comando giusto è `restart`, non un nuovo `start`/`ensure`.
-- `/whip_theme <resource>` è uno strumento di preview **per singolo client** (vedi
-  `server/devtools.lua`), non un'impostazione globale.
+- **Edited `theme.css` on disk?** Nobody notices by themselves: the browser has already loaded the
+  `<link>`. Use `restart whip_inventory_compact` for everyone, or `/whip_theme
+  whip_inventory_compact` to try it just for yourself.
+- Calling `SetActiveTheme` with the **same** name does nothing: the registry does not rebroadcast
+  an identical value. That is why `restart` is the right command, not another `start`/`ensure`.
+- `/whip_theme <resource>` is a **single-client** preview tool (see `server/devtools.lua`), not a
+  global setting.
 
-### Renderla il tema di default (senza toccare file)
+### Make it the default theme (without editing files)
 
-1. `stop whip_inventory_compact` — finché l'override è attivo vince lui.
-2. In game apri `/whip` → **Settings** → **Theme** → `whip_inventory_compact`.
+1. `stop whip_inventory_compact` — while the override is active, it wins.
+2. In game open `/whip` → **Settings** → **Theme** → `whip_inventory_compact`.
 
-Il valore viene salvato su file da WHIP e `Settings.onChange('Theme')` lo applica subito a tutti;
-d'ora in poi è il tema fisso, anche per i nuovi joiner, e non serve più tenere avviata la risorsa
-come override. In alternativa classica si può cambiare `Config.Theme` in `whip_core/config.lua`
-(riga 1797, ora `whip_inventory_compact`), ma richiede il restart di `whip_core`.
+WHIP saves the value to file and `Settings.onChange('Theme')` applies it immediately to everyone;
+from then on it is the fixed theme, also for new joiners, and the resource no longer needs to stay
+started as an override. The classic alternative is to change `Config.Theme` in
+`whip_core/config.lua` (line 1797, now `whip_inventory_compact`), but that requires a `whip_core`
+restart.
 
-## Pacchetto GitHub
+## GitHub package
 
-La cartella è autonoma, non contiene file del server o di `whip_core` ed è pubblicata su
+The folder is self-contained, contains no server or `whip_core` files, and is published at
 **https://github.com/OkanFeNwa/whip_inventory_compact** (branch `main`).
 
 ```
@@ -171,102 +171,104 @@ whip_inventory_compact/
 ├── .gitattributes
 ├── .gitignore
 ├── LICENSE              MIT
-├── README.md            italiano + link alle altre 4 lingue
-├── README.en.md / README.es.md / README.fr.md / README.de.md
+├── README.md            English + links to the other 4 languages
+├── README.it.md / README.es.md / README.fr.md / README.de.md
 ├── CHANGELOG.md
-├── config.lua           lingua + label
+├── config.lua           language + labels
 ├── fxmanifest.lua
-├── server.lua           genera locales/active.css e applica il tema
-├── client.lua           annulla il blur nativo
-├── theme.css            layout + import del CSS lingua
-├── shared/locale.lua    loader con fallback
-├── locales/active.css   generato (default: italiano)
+├── server.lua           generates locales/active.css and applies the theme
+├── client.lua           cancels the native blur
+├── theme.css            layout + import of the language CSS
+├── shared/locale.lua    loader with fallback
+├── locales/active.css   generated (default: Italian)
 └── docs/screenshots/
     ├── pockets.png
     └── stash.png
 ```
 
-`fxmanifest.lua` contiene già il campo `repository` con l'URL qui sopra. Il `CHANGELOG.md` usa
-SemVer: questa release è `1.2.0`.
+`fxmanifest.lua` already contains the `repository` field with the URL above. `CHANGELOG.md` uses
+SemVer: this release is `1.2.0`.
 
-![Inventario — tasche](docs/screenshots/pockets.png)
+![Inventory — pockets](docs/screenshots/pockets.png)
 
-![Inventario — contenitore e portafoglio](docs/screenshots/stash.png)
+![Inventory — container and wallet](docs/screenshots/stash.png)
 
-## Verifica fatta
+## Verification performed
 
-Preview headless di WHIP a 1920x1080 con il tema iniettato:
+Headless WHIP previews at 1920x1080 with the theme injected:
 
-- margini schermo: **24px a sinistra e 24px a destra** (wrapper 1872px), 89px in alto/in basso;
-- entrambe le colonne larghe 420px (560px interni × 0.75 di zoom);
-- scheda sinistra **senza alcun bordo laterale** (verificato: `border-left/right: 0` su titolo,
-  accessori, griglia, Nearby e legenda). Titolo (y=89, alta 44px) **attaccato** agli accessori
-  (y=133, alta 101px), che a loro volta toccano l'inventario (y=234): zero gap. Poi Terra (y=730),
-  legenda (y=955);
-- tre divisori da 1px, tutti `background-image` con `background-size: 480px 1px` e
-  `no-repeat` centrato (sotto il titolo, sotto gli accessori, sopra la Terra): righe corte e
-  rientrate, non un contorno; nome e peso verificati («John Framework 13.95 / 80 kg»);
-- slot accessori, giocatore, Terra e contenitore tutti 72×72px sullo schermo (96px interni);
-- 5 colonne per riga in ogni griglia; Nearby 390×152px (5×2 riquadri). Gli slot vuoti nativi e
-  quelli disegnati dall'SVG hanno valori identici: sfondo `rgba(255,255,255,.03)`, bordo
-  trasparente, raggio 11px (confrontato via `getComputedStyle`);
-- nessuna ombra sui pannelli;
-- tooltip sull'oggetto: con hover su uno slot a (300,300) il box finisce a x=316, y=284
-  (`left/top` inline di WHIP, senza transform). Dimensione **285×96px** (era 225×80px); nome 20px,
-  descrizione 15px, righe 13px. I quattro margini sono stati provati con `mousemove` a
-  (20,300), (1900,300), (300,10), (300,1070): il box resta sempre dentro 1920×1080
-  (rispettivamente x=36, x=1599+285=1884, y=26, bottom=1072);
-- animazione: tracciata la sequenza esatta di `showOverlay()` frame per frame. L'overlay scatta a
-  `opacity:1` (nessuna seconda fade) e il guscio sale da `translateY(10px)` a 0 con opacità
-  0.29 → 0.61 → 0.93 → 1, posizione y 94.2 → 91.7 → 89.3 → 88.8: rampa monotona, nessun salto.
-  Nessun `scale()` (solo `translate`), quindi nessun pixel frazionario su `zoom:0.75`.
-  Togliendo `.visible` la chiusura resta animata. L'accessorio ha `opacity:1`, `transform:none`,
-  `transition:none` in entrambi gli stati: arriva insieme al resto;
-- wash: con `.on` e colore inline `rgba(10,12,18,.55)` scritto da JS, il calcolato è
-  `background: rgba(0,0,0,0)` → nessuno scurimento;
-- pannello contenitore: `animation-name: skinPanelIn`, durata 0.26s (comparsa verificata);
-- tooltip: delay 0.32s + 0.18s di animazione. Subito dopo `.visible` e a +200ms l'`.inv-pop` è a
-  `opacity:0`, a +340ms è a 0.58, a +580ms è a 1 con `transform` identità. Il box esterno ha
-  `transform: none` e `animation-name: none`, quindi i `left/top` inline di WHIP non vengono
-  alterati;
-- nomi oggetti: il nome «Phone» nello slot 72px è largo 27px sullo schermo (prima 9px, cioè la
-  sola «P»), con `max-width: calc(100% - 42px)`. Etichette accessori a 15px interni, colore
-  `var(--ui-text)` pieno, e legenda a 15px / keycap 14px (prima 10px e 11px);
-- lingue: con `locales/active.css` in italiano il `::after` degli slot accessori restituisce
-  `"Telefono"`, `"Contanti"`, `"Chiave 1"`…; sostituendo il file con i valori EN e poi ES (con
-  accenti) le etichette diventano `"Phone"/"Cash"/"Key 1"` e `"Teléfono"/"Efectivo"/"Llave 1"`,
-  lette da `getComputedStyle` — quindi l'`@import` e le varianti UTF-8 funzionano nel CEF di WHIP;
-- hotbar di Tab: dopo la rimozione di `.visible` l'opacità resta **1 a 0 e a 1900ms**, a 2050ms è
-  0.28 e a 2200ms è 0 → pienamente visibile per 2 secondi, poi fade di 0.2s. Capsula con sfondo
-  `rgba(13,18,26,.9)`, bordo `rgba(255,255,255,.1)`, raggio 14px, senza ombra; keycap con sfondo
-  `rgba(255,255,255,.1)` e lo stesso bordo — nessun blu. Vale anche per il segmento nei hint;
-- scena `pockets`: scheda sinistra come sopra, centro libero;
-- scena `stash`: contenitore a destra (x=1476, y=188, 420×543) e portafoglio sotto
-  (x=1476, y=740, 420×152): il gruppo è **centrato verticalmente** (105px sopra e 106px sotto),
-  **zero sovrapposizioni** (verificato con bounding box); Terra ancora presente a sinistra.
-- La barra di debug che si vede nelle anteprime è del tool di preview di WHIP (`#whip-preview-bar`):
-  non esiste in game e si nasconde con `F9` nel preview (nei miei screenshot è rimossa).
+- screen margins: **24px on the left and 24px on the right** (1872px wrapper), 89px at the top and
+  bottom;
+- both columns are 420px wide on screen (560px internal × 0.75 zoom);
+- left card **with no side borders** (verified: `border-left/right: 0` on title, accessories, grid,
+  Nearby and key hints). Title (y=89, 44px high) **attached** to the accessories (y=133, 101px
+  high), which in turn touch the inventory (y=234): zero gap. Then Ground (y=730), key hints
+  (y=955);
+- three 1px dividers, all using `background-image` with `background-size: 480px 1px` and centred
+  `no-repeat` (below the title, below the accessories, above the Ground): short, inset lines, not
+  an outline; name and weight verified ("John Framework 13.95 / 80 kg");
+- accessory, player, Ground and container slots all 72×72px on screen (96px internal);
+- 5 columns per row in every grid; Nearby 390×152px (5×2 boxes). Native empty slots and SVG-drawn
+  ones have identical values: `rgba(255,255,255,.03)` background, transparent border, 11px radius
+  (compared via `getComputedStyle`);
+- no shadows on the panels;
+- item tooltip: hovering a slot at (300,300) puts the box at x=316, y=284 (WHIP's inline
+  `left/top`, without transform). Size **285×96px** (was 225×80px); name 20px, description 15px,
+  rows 13px. All four edges were tested with `mousemove` to (20,300), (1900,300), (300,10),
+  (300,1070): the box always stayed inside 1920×1080 (x=36, x=1599+285=1884, y=26,
+  bottom=1072 respectively);
+- animation: the exact `showOverlay()` sequence was traced frame by frame. The overlay snaps to
+  `opacity:1` (no second fade) and the shell rises from `translateY(10px)` to 0 with opacity
+  0.29 → 0.61 → 0.93 → 1 and y 94.2 → 91.7 → 89.3 → 88.8: a monotonic ramp, no jumps. No
+  `scale()` (only `translate`), so no fractional pixels at `zoom:0.75`. Removing `.visible` keeps
+  the closing animation. The accessory has `opacity:1`, `transform:none`, `transition:none` in both
+  states: it arrives together with the rest;
+- wash: with `.on` and the inline colour `rgba(10,12,18,.55)` written by JS, the computed value is
+  `background: rgba(0,0,0,0)` → no dimming;
+- container panel: `animation-name: skinPanelIn`, 0.26s duration (arrival verified);
+- tooltip: 0.32s delay + 0.18s animation. Right after `.visible` and at +200ms the `.inv-pop` is at
+  `opacity:0`, at +340ms it is 0.58, at +580ms it is 1 with an identity `transform`. The outer box
+  has `transform: none` and `animation-name: none`, so WHIP's inline `left/top` are not altered;
+- item names: the name "Phone" in a 72px slot is 27px wide on screen (formerly 9px, just the "P"),
+  with `max-width: calc(100% - 42px)`. Accessory labels at 15px internal, full
+  `var(--ui-text)` colour, and key hints at 15px / keycaps 14px (formerly 10px and 11px);
+- languages: with Italian `locales/active.css` the accessory slots' `::after` returns
+  `"Telefono"`, `"Contanti"`, `"Chiave 1"`…; replacing the file with EN and then ES values (with
+  accents) changes the labels to `"Phone"/"Cash"/"Key 1"` and `"Teléfono"/"Efectivo"/"Llave 1"`,
+  read via `getComputedStyle` — so the `@import` and UTF-8 variants work in WHIP's CEF;
+- Tab hotbar: after `.visible` is removed, opacity stays **1 at 0 and at 1900ms**, is 0.28 at
+  2050ms and 0 at 2200ms → fully visible for 2 seconds, then a 0.2s fade. Capsule with
+  `rgba(13,18,26,.9)` background, `rgba(255,255,255,.1)` border, 14px radius, no shadow; keycaps
+  with `rgba(255,255,255,.1)` background and the same border — no blue. Also applies to the
+  segment inside the hints;
+- `pockets` scene: left card as above, centre free;
+- `stash` scene: container on the right (x=1476, y=188, 420×543) and wallet below it
+  (x=1476, y=740, 420×152): the group is **vertically centred** (105px above and 106px below),
+  with **zero overlaps** (checked with bounding boxes); Ground is still present on the left.
+- The debug bar visible in the previews belongs to WHIP's preview tool (`#whip-preview-bar`): it
+  does not exist in game and can be hidden with `F9` in the preview (it is removed in the
+  screenshots).
 
-Per il blur la verifica è sul sorgente, non sul preview headless (che non esegue le native):
-`TriggerScreenblurFadeIn` / `FadeOut` in `inventory.lua:1062` / `:1358`, i tre eventi di rete
-che aprono l'UI (`:1485`, `:1708`, `:1760`) e l'export `IsInventoryOpen` alla riga 2724.
-Il lampo di un frame è stato eliminato registrando i nostri handler sugli stessi eventi: girano
-dopo quelli di WHIP perché la risorsa ha `dependency 'whip_core'`. **Va confermato in game** con
-`restart whip_inventory_compact` (serve il restart, non solo il ricaricamento del CSS).
+For the blur, verification is on the source rather than the headless preview (which does not run
+natives): `TriggerScreenblurFadeIn` / `FadeOut` at `inventory.lua:1062` / `:1358`, the three net
+events that open the UI (`:1485`, `:1708`, `:1760`) and the `IsInventoryOpen` export at line 2724.
+The one-frame flash was eliminated by registering our handlers on the same events: they run after
+WHIP's because the resource declares `dependency 'whip_core'`. **Still to be confirmed in game**
+with `restart whip_inventory_compact` (a restart is needed, not just a CSS reload).
 
-## Se qualcosa non torna
+## If something looks wrong
 
-- La skin è fail-soft: se `theme.css` non viene servito, WHIP resta con l'aspetto base e lo
-  scrive nella console F8.
-- Due sole regole usano `!important` perché devono battere stili inline scritti da `inventory.js`:
-  il colore di `#inv-wash` e il `display` di `#inv-ground-panel`. Sono mirate a quegli elementi,
-  non globali. Il tooltip, invece, non usa `!important`: lascia stare `left`/`top` di JS e si limita
-  a `transform: none` + `animation: none`, così i clamp di posizione di WHIP restano validi.
-- Le colonne si regolano in `theme.css` alla regola `.inv-wrapper` → `grid-template-columns`
-  (valori in pixel "interni", poi moltiplicati per lo zoom di WHIP). La larghezza è
-  `--skin-card-w`, la dimensione degli slot è `--skin-slot`, entrambe in cima al file.
-- Se cambi `Config.Locale` ma le etichette non cambiano: controlla in console F8 il messaggio
-  `[whip_inventory_compact] Lingua attiva: ...`. Se c'è un errore di scrittura, il server non può
-  aggiornare `locales/active.css` (permessi di cartella): dai permessi di scrittura alla risorsa
-  oppure modifica a mano `locales/active.css` con le label volute. In entrambi i casi serve
-  `restart whip_inventory_compact`, non solo `/whip_theme`.
+- The skin is fail-soft: if `theme.css` is not served, WHIP keeps its stock look and writes a note
+  in the F8 console.
+- Only two rules use `!important`, because they have to beat inline styles written by
+  `inventory.js`: the `#inv-wash` colour and the `#inv-ground-panel` `display`. They target those
+  elements only, not everything. The tooltip uses no `!important`: it leaves JS's `left`/`top`
+  alone and only sets `transform: none` + `animation: none`, so WHIP's position clamps keep working.
+- The columns are adjusted in `theme.css`, in the `.inv-wrapper` rule → `grid-template-columns`
+  (values in "internal" pixels, then multiplied by WHIP's zoom). The card width is
+  `--skin-card-w`, the slot size is `--skin-slot`, both at the top of the file.
+- If you change `Config.Locale` but the labels do not change, check the F8 console message
+  `[whip_inventory_compact] Active language: ...`. If there was a write error, the server cannot
+  update `locales/active.css` (folder permissions): grant write access to the resource or edit
+  `locales/active.css` by hand with the desired labels. In either case run `restart
+  whip_inventory_compact`, not just `/whip_theme`.

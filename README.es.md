@@ -5,7 +5,7 @@ arrastrar y soltar, tooltips, menús, pesos y la validación del servidor. Este 
 `theme.css`, un pequeño `client.lua` que elimina el desenfoque del juego y un selector de idioma
 de una sola línea.
 
-Consulta [README.md](README.md) para la documentación completa en italiano y las verificaciones.
+Consulta [README.md](README.md) para la documentación completa en inglés y las verificaciones.
 
 ## Características
 
@@ -31,9 +31,16 @@ pertenecen a `whip_core` y no puede cambiarlos un tema CSS.
 
 ## Instalación
 
-Copia la carpeta en `resources/[custom]/whip_inventory_compact/` y añade
-`ensure whip_inventory_compact` a `server.cfg`, o iníciala desde txAdmin. Requiere `whip_core`.
-No hace falta editar archivos existentes del servidor.
+La carpeta puede estar en **cualquier directorio bajo `resources/`** (`[custom]`, `[core]`, la
+raíz de `resources/` u otra categoría). Solo importan el nombre de la carpeta y la dependencia de
+`whip_core`:
+
+```
+resources/<cualquier-carpeta>/whip_inventory_compact/
+```
+
+Añade `ensure whip_inventory_compact` a `server.cfg`, o iníciala desde txAdmin. Requiere
+`whip_core`. No hace falta editar archivos existentes del servidor.
 
 | Comando | Efecto |
 |---|---|
