@@ -4,6 +4,15 @@ All notable changes to this resource are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-11-18
+
+### Fixed
+- Removed the last one-frame blur flash on open. The normal F2 open is handled
+  locally inside `whip_core` and never fires a net event; the blur killer was
+  therefore waiting up to 40 ms before noticing the inventory was open. It now
+  polls `IsInventoryOpen()` every frame, so `TriggerScreenblurFadeOut(1)` lands
+  in the same frame as WHIP's `TriggerScreenblurFadeIn(200)`.
+
 ## [1.2.0] - 2026-11-18
 
 ### Changed

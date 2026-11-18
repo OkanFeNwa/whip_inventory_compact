@@ -17,9 +17,8 @@ local function inventoryIsOpen()
     return ok and open == true
 end
 
--- WHIP opens its UI from these net events. Our resource starts AFTER whip_core
--- (dependency), so our handler is registered later and runs in the SAME TICK,
--- right after WHIP's FadeIn. The blur never gets a visible frame.
+-- Server-pushed opens (stash, vehicle, admin inspect, panels). Our resource starts
+-- after whip_core (dependency), so this runs in the same tick as WHIP's FadeIn.
 local OPEN_EVENTS = {
     'whip_core:client:openInventory',
     'whip_core:client:openPlayerInventory',
@@ -29,18 +28,15 @@ for _, event in ipairs(OPEN_EVENTS) do
     RegisterNetEvent(event, killBlur)
 end
 
--- Local opens (F2 from cache, radial, pad) never come through a net event.
--- Poll every frame while open to catch those too; 40ms is plenty when closed.
+-- The common F2 open is LOCAL (inventoryKey -> Inventory.openUI) and never fires
+-- a net event. WHIP sets invOpen BEFORE TriggerScreenblurFadeIn, so polling every
+-- frame lets us cancel the fade in the same frame it starts.
+--
+-- Do NOT idle at 40ms here: that gap was the residual one-frame blur flash.
 CreateThread(function()
-    local interval = 40
-
     while true do
-        Wait(interval)
-
-        local open = inventoryIsOpen()
-        interval = open and 0 or 40
-
-        if open then
+        Wait(0)
+        if inventoryIsOpen() then
             killBlur()
         end
     end
