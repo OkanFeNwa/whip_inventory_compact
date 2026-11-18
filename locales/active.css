@@ -1,0 +1,9 @@
+/* Generated from config.lua by server.lua. Do not edit by hand.
+   Change Config.Locale and `restart whip_inventory_compact` instead. */
+:root {
+    --skin-label-phone: 'Telefono';
+    --skin-label-cash: 'Contanti';
+    --skin-label-key1: 'Chiave 1';
+    --skin-label-key2: 'Chiave 2';
+    --skin-label-key3: 'Chiave 3';
+}

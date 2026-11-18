@@ -1,0 +1,10 @@
+# Editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# FiveM / local runtime artifacts
+*.log
+server.cfg
+cache/

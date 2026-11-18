@@ -1,0 +1,568 @@
+/* =============================================================================
+   whip_inventory_compact — "Tall Twin Columns"
+
+   SKIN, NOT A REWRITE. whip_core still draws every slot, handles drag & drop,
+   tooltips, menus, weights and server validation. This file only lays the
+   EXISTING panels out differently:
+
+     - two columns of EQUAL width, hugging their content with a screen gutter;
+     - left: accessories, player grid, Nearby (2 rows of real boxes), key hints;
+     - right: the stash / boot / bag / wallet windows STACKED, never overlapping;
+     - centre of the screen free;
+     - 5 columns per row in every grid; the hover tooltip sits ON the item.
+
+   Chromium 103-safe CSS. No renderer, no JS, no whip_core files touched.
+   ============================================================================= */
+
+@import url('locales/active.css');
+
+:root {
+    --ui-zoom-inventory: 1;
+
+    --ui-radius-panel: 14px;
+    --ui-panel-glow: none;
+    --ui-border: rgba(255, 255, 255, 0.10);
+    --ui-surface-solid: rgba(13, 18, 26, 0.90);
+
+    --ui-accent: #60a5fa;
+    --ui-accent-glow: rgba(96, 165, 250, 0.16);
+
+    /* INTERNAL pixels: multiply by --ui-scale (0.75 at 1080p) for screen size.
+       Both cards 560 -> 420px on screen; every slot 96 -> 72px. */
+    --skin-card-w: 560px;
+    --skin-slot: 96px;
+    --skin-gap: 10px;        /* the native --ui-sp-5 grid gap */
+    --skin-screen-gutter: 24px;  /* left/right, screen px */
+    --skin-screen-margin: 20px;  /* top/bottom, screen px */
+    --skin-line: rgba(255, 255, 255, 0.14);
+    /* WHIP's --ui-ease is an extreme ease-out: ~60% of the travel happens in the
+       first frame, which reads as a pop/jitter. This one is spread evenly. */
+    --skin-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* inventory.js writes the wash colour as an INLINE style. The skin wants NO
+   screen dimming at all: only the panels, never a dark film over the game. */
+#inv-wash {
+    background: transparent !important;
+    box-shadow: none;
+}
+
+/* -----------------------------------------------------------------------------
+   1. TWO EQUAL COLUMNS, CENTERED, WITH A SCREEN GUTTER
+   The overlay's main axis is vertical: justify-content centres vertically,
+   align-items pins the shell to the left.
+   ----------------------------------------------------------------------------- */
+#inv-overlay {
+    justify-content: center;
+    align-items: flex-start;
+    padding: var(--skin-screen-margin) var(--skin-screen-gutter);
+    /* Exit only: WHIP removes .visible BEFORE .open (250ms later), so a
+       transition on the RESTING state gives us a real, animated close. */
+    transition: opacity 0.22s ease-in;
+}
+
+#inv-overlay.visible {
+    /* Snap on OPEN. WHIP fades the overlay 0->1 and the shell 0->1 at the same
+       time; the two alphas multiplied and the steep --ui-ease made the first
+       visible frame jump straight to ~30% opacity — that was the flicker. The
+       shell's own fade is now the only one. On close this rule stops matching,
+       so the 0.22s exit above takes over. */
+    transition: none;
+}
+
+#inv-overlay .inv-container {
+    width: calc((100vw - var(--skin-screen-gutter) * 2) / var(--ui-scale));
+    /* A small, physical opening: the whole shell lifts and settles. NO scale():
+       this element carries zoom:0.75, and scaling a zoomed layer re-rasters every
+       slot and label at fractional pixels — that was the tiny shimmer. Pure
+       translate keeps every pixel aligned. On close WHIP keeps .open for 250ms. */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.24s ease-in, transform 0.24s ease-in;
+}
+
+/* Match WHIP's own #inv-overlay.visible .inv-container specificity — its 0.35s
+   transition would otherwise win over the one on the base rule above. */
+#inv-overlay.visible .inv-container {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.26s var(--skin-ease), transform 0.26s var(--skin-ease);
+}
+
+/* WHIP makes the accessory rail enter 0.07s LATER than the grid (its .visible
+   rule has a transition-delay). That is why the inventory arrived first and
+   the phone/cash/keys followed. Kill the rail's own opacity/slide entirely:
+   the whole shell now moves as one piece, on open AND on close. */
+#inv-overlay .inv-accessory-panel {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+#inv-overlay.visible .inv-accessory-panel {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+/* The wrapper is the layout grid. .inv-col-right is flattened so the legend and
+   the panel stack become grid items; the stack itself is the right column. */
+#inv-overlay .inv-wrapper {
+    display: grid;
+    width: 100%;
+    height: auto;
+    grid-template-columns: var(--skin-card-w) 1fr var(--skin-card-w);
+    /* Rows: window title (name + capacity), accessories, inventory, Nearby
+       (RESERVED because its panel is absolute in the DOM), legend. */
+    grid-template-rows: auto auto auto 300px 48px;
+    grid-template-areas:
+        "title  .  right"
+        "acc    .  right"
+        "grid   .  right"
+        "ground .  right"
+        "legend .  right";
+    column-gap: 24px;
+    row-gap: 0;
+    align-items: start;
+    position: relative;
+}
+
+/* -----------------------------------------------------------------------------
+   2. LEFT CARD — the native pieces stacked with no dead space inside
+   ----------------------------------------------------------------------------- */
+/* WHIP's major-panel lift is the heavy shadow the layout does not want. */
+#inv-overlay .inv-panel,
+#inv-overlay .inv-shopfront {
+    box-shadow: none;
+}
+
+/* The player's own header becomes the window title, and the player panel is
+   flattened so its header and grid can be placed in different grid rows. Same
+   for .inv-col-center — the DOM stays untouched, only the CSS boxes go away. */
+#inv-overlay .inv-col-center,
+#inv-overlay #inv-player-panel {
+    display: contents;
+}
+
+#inv-overlay #inv-player-panel > .inv-panel-header {
+    grid-area: title;
+    box-sizing: border-box;
+    padding: 14px 18px;
+    /* WHIP gives this a 14px margin-bottom: that was the 10px gap that made the
+       title look detached. Zero it — title, accessories and inventory are ONE
+       continuous card. */
+    margin: 0;
+    background: var(--ui-surface-solid);
+    border: 0;
+    border-radius: 14px 14px 0 0;
+    /* The small divider, same language as inventory | Nearby. It is drawn as a
+       short centred rule (480 internal px inside a 560px card), not an outline
+       around the whole window. */
+    background-image: linear-gradient(var(--skin-line), var(--skin-line));
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: 480px 1px;
+    box-shadow: none;
+}
+
+#inv-overlay .inv-accessory-panel {
+    grid-area: acc;
+    align-self: start;
+    display: block;
+    border-radius: 0;
+    /* No left/right stroke: only short horizontal rules, never a frame. */
+    border: 0;
+    background-image: linear-gradient(var(--skin-line), var(--skin-line));
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: 480px 1px;
+    box-shadow: none;
+}
+
+#inv-overlay .inv-col-left {
+    display: none;
+}
+
+/* 5 columns, fixed square slots. No aspect-ratio stretching. */
+#inv-overlay #inv-player-grid {
+    grid-area: grid;
+    box-sizing: border-box;
+    padding: 16px 18px 20px;
+    margin: 0;
+    background: var(--ui-surface-solid);
+    border: 0;
+    overflow: visible;
+    grid-template-columns: repeat(5, var(--skin-slot));
+    grid-auto-rows: var(--skin-slot);
+    justify-content: center;
+    align-content: start;
+    aspect-ratio: auto;
+    /* Shrink-wrap the rows: no dead space under the last row. */
+    height: fit-content;
+    max-height: fit-content;
+}
+
+#inv-overlay #inv-player-grid .inv-slot {
+    width: var(--skin-slot);
+    height: var(--skin-slot);
+}
+
+/* Nearby. WHIP writes display:none INLINE on this panel when a container opens
+   (setPanels), so this is one of the two deliberate !important overrides. */
+#inv-overlay #inv-ground-panel {
+    /* It sits in #inv-panel-stack in the DOM. Absolute + a reserved grid row
+       puts it back at the foot of the LEFT card without touching the markup. */
+    position: absolute;
+    left: 0;
+    bottom: 48px;       /* the legend's height, in internal px */
+    width: var(--skin-card-w);
+    height: 300px;
+    display: flex !important;
+    flex-direction: column;
+    margin: 0;
+    border-radius: 0;
+    border: 0;
+    /* Same short rule as above, this time at the TOP of Nearby. */
+    background-image: linear-gradient(var(--skin-line), var(--skin-line));
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: 480px 1px;
+    box-shadow: none;
+    min-height: 0;
+}
+
+#inv-overlay #inv-ground-panel .inv-panel-header {
+    padding-bottom: 6px;
+}
+
+#inv-overlay #inv-ground-panel .inv-ground-scroll {
+    max-height: none;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+/* Draw the 5 x 2 landing boxes in CSS so Nearby ALWAYS has riquadri, even when
+   WHIP renders no ground slots (stash scene). The SVG is an exact copy of a
+   native EMPTY slot: 96px internal, 11px radius, rgba(255,255,255,.03) fill,
+   no visible edge — so the drawn boxes and the real inventory slots match.
+   The tile is slot + gap, so native slots line up exactly on top of them. */
+#inv-overlay #inv-ground-grid {
+    position: relative;
+    width: calc(var(--skin-slot) * 5 + var(--skin-gap) * 4);
+    height: calc(var(--skin-slot) * 2 + var(--skin-gap));
+    min-height: 0;
+    max-height: none;
+    grid-template-columns: repeat(5, var(--skin-slot));
+    grid-auto-rows: var(--skin-slot);
+    justify-content: center;
+    align-content: start;
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='106'%20height='106'%3E%3Crect%20x='0'%20y='0'%20width='96'%20height='96'%20rx='11'%20fill='%23ffffff'%20fill-opacity='0.03'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: calc(var(--skin-slot) + var(--skin-gap)) calc(var(--skin-slot) + var(--skin-gap));
+}
+
+#inv-overlay #inv-ground-grid .inv-slot {
+    width: var(--skin-slot);
+    height: var(--skin-slot);
+}
+
+#inv-overlay #inv-ground-grid .inv-slot.has-item {
+    background: var(--ui-slot-bg-filled);
+    border-color: var(--ui-slot-line-filled);
+}
+
+/* The key hints are part of the card, not a separate pill. */
+#inv-overlay .inv-legend {
+    grid-area: legend;
+    position: static;
+    height: 52px;
+    min-height: 0;
+    margin: 0;
+    padding: 0 var(--ui-sp-7);
+    background: var(--ui-surface-solid);
+    border: 0;
+    border-radius: 0 0 14px 14px;
+    box-shadow: none;
+    font-size: 15px;
+    color: var(--ui-text);
+}
+
+#inv-overlay .inv-legend-item { gap: 8px; }
+
+#inv-overlay .inv-legend .inv-key {
+    font-size: 14px;
+    min-width: 26px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(96, 165, 250, 0.16);
+    border-color: rgba(96, 165, 250, 0.38);
+    color: var(--ui-text);
+    box-shadow: none;
+}
+
+/* -----------------------------------------------------------------------------
+   3. RIGHT COLUMN — a real flex stack, so container + wallet never overlap
+   ----------------------------------------------------------------------------- */
+#inv-overlay .inv-col-right {
+    display: contents;
+}
+
+/* Override WHIP's absolutely-positioned, scrolling stack. It becomes a normal
+   grid item in the right area, only as tall as the panels it contains. */
+#inv-overlay #inv-panel-stack {
+    grid-area: right;
+    /* As a group, the right-hand windows are centred vertically, whether one or
+       many are open. The first-opened panel comes first in WHIP's DOM, so with
+       a normal column flex it stays at the top of the stack. */
+    align-self: center;
+    position: static;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    max-height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* A container that gets opened (stash, boot, bag, wallet) rises into place.
+   WHIP only animates panels SWAPPED while the inventory is already up. */
+@keyframes skinPanelIn {
+    /* Translate only, for the same reason as the shell: no fractional-pixel
+       scale on a zoomed layer. */
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+#inv-overlay #inv-panel-stack > .inv-panel:not(#inv-ground-panel) {
+    flex: 0 0 auto;
+    margin: 0;
+    border-radius: 14px;
+    border: 1px solid rgba(96, 165, 250, 0.28);
+    /* Flat and quiet — no drop shadow. */
+    box-shadow: none;
+    animation: skinPanelIn 0.26s var(--skin-ease) both;
+}
+
+#inv-overlay #inv-container-grid {
+    grid-template-columns: repeat(5, var(--skin-slot));
+    grid-auto-rows: var(--skin-slot);
+    justify-content: center;
+}
+
+/* -----------------------------------------------------------------------------
+   4. ACCESSORIES — the native 5 slots, same size as the inventory slots
+   ----------------------------------------------------------------------------- */
+#inv-overlay .inv-accessory-grid {
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 10px 26px;
+}
+
+#inv-overlay .inv-accessory-slot {
+    width: var(--skin-slot);
+    height: var(--skin-slot);
+    flex: 0 0 var(--skin-slot);
+    border-color: rgba(96, 165, 250, 0.30);
+}
+
+#inv-overlay .inv-accessory-slot::after {
+    position: absolute;
+    left: -12px;
+    right: -12px;
+    bottom: -24px;
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    font-weight: var(--ui-fw-semibold);
+    color: var(--ui-text);
+    text-shadow: var(--ui-rim);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Labels come from config.lua via locales/active.css (IT/EN/ES/FR/DE). */
+#inv-overlay .inv-accessory-slot[data-slot="1"]::after { content: var(--skin-label-phone); }
+#inv-overlay .inv-accessory-slot[data-slot="2"]::after { content: var(--skin-label-cash); }
+#inv-overlay .inv-accessory-slot[data-slot="3"]::after { content: var(--skin-label-key1); }
+#inv-overlay .inv-accessory-slot[data-slot="4"]::after { content: var(--skin-label-key2); }
+#inv-overlay .inv-accessory-slot[data-slot="5"]::after { content: var(--skin-label-key3); }
+
+/* WHIP reserves 82px of a 96px slot for the stack count, leaving the name only
+   14px — one letter. The count sits at the right edge, so give the name the rest
+   of the tile and let long names ellipsise instead of collapsing to "P…". */
+#inv-overlay .inv-slot-name {
+    max-width: calc(100% - 42px);
+    font-size: var(--ui-fs-md);
+    bottom: 11px;
+}
+
+/* -----------------------------------------------------------------------------
+   5. QUICK SLOTS 1-5 — already the hotbar in whip
+   ----------------------------------------------------------------------------- */
+#inv-overlay #inv-player-grid .inv-slot[data-slot="1"],
+#inv-overlay #inv-player-grid .inv-slot[data-slot="2"],
+#inv-overlay #inv-player-grid .inv-slot[data-slot="3"],
+#inv-overlay #inv-player-grid .inv-slot[data-slot="4"],
+#inv-overlay #inv-player-grid .inv-slot[data-slot="5"] {
+    border-color: rgba(96, 165, 250, 0.45);
+    box-shadow: inset 0 -3px 0 var(--ui-accent);
+}
+
+#inv-overlay #inv-player-grid .inv-slot-number {
+    background: var(--ui-accent);
+    border-color: var(--ui-accent);
+    color: #06101e;
+}
+
+/* -----------------------------------------------------------------------------
+   6. ITEM TOOLTIP — appears ON the hovered item, not docked at the bottom
+   positionTooltip() writes left/top as INLINE styles at the cursor. We leave
+   those alone and pull the card up over the slot with a transform. whip's
+   .visible animation would overwrite it with an identity transform, so stop it.
+   ----------------------------------------------------------------------------- */
+/* WHIP's .visible animation (invFadeUp) shifts the tooltip, which would fight
+   the inline left/top that positionTooltip() writes to keep the card on screen.
+   Stop it and let the native clamps do their job: -50%/-100% transforms used to
+   shift the card AFTER those clamps, so a slot near the left or top edge pushed
+   it off screen. The card now sits where JS puts it, just above the cursor. */
+#inv-tooltip.visible {
+    animation: none;
+}
+
+#inv-tooltip {
+    transform: none;
+}
+
+#inv-tooltip .inv-pop {
+    box-sizing: border-box;
+    max-width: 380px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border-color: rgba(96, 165, 250, 0.38);
+}
+
+/* The reveal lives on the INNER pop, so the outer box keeps its positioning
+   transform and JS's inline left/top stay untouched. `both` holds the pop at
+   opacity 0 DURING the delay: the card only appears once the mouse has rested
+   on the item for ~320ms, then eases up into place. inventory.js adds .visible
+   once per slot (mousemove only repositions), so every new item gets the delay. */
+#inv-tooltip.visible .inv-pop {
+    animation: skinTooltipIn 0.18s var(--skin-ease) 0.32s both;
+}
+
+@keyframes skinTooltipIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.96); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* WHIP's 16/13/11px internal type is ~12/10/8px on screen here. Bump it one
+   step so the card reads at a glance without changing the renderer's HTML. */
+#inv-tooltip .inv-tooltip-name { font-size: 20px; line-height: 1.2; }
+#inv-tooltip .inv-tooltip-desc { font-size: 15px; }
+#inv-tooltip .inv-tooltip-meta-row,
+#inv-tooltip .inv-tooltip-stat { font-size: 13px; }
+
+/* -----------------------------------------------------------------------------
+   7. HOTBAR (Tab) — the same flat language as the inventory card
+   The discs keep WHIP's behaviour (1-5, counts, active state); only the surface
+   changes. #ui-drawtext is included because hotbar.js MOVES #hotbar-seg into the
+   hint capsule when one is up, so the vars have to follow it there.
+   ----------------------------------------------------------------------------- */
+#hotbar,
+#ui-drawtext {
+    /* Same language as the inventory card: dark solid surface, quiet white
+       lines, no blue halo. Only the state colours below carry meaning. */
+    --sh-disc-ring: rgba(255, 255, 255, 0.22);
+    --sh-disc-outline: none;
+    --sh-disc-core: var(--ui-surface-solid);
+}
+
+#hotbar .hb-cap,
+#ui-drawtext .hb-cap {
+    background: var(--ui-surface-solid);
+    border-color: var(--ui-border);
+    border-radius: var(--ui-radius-panel);
+    box-shadow: none;
+}
+
+#hotbar .hb-cap::before,
+#ui-drawtext .hb-cap::before {
+    display: none;
+}
+
+/* Tab is a HOLD in WHIP: keyup calls hideHotbar(), which drops .visible at once.
+   Delay the RESTING transition instead, so the capsule stays fully up for at
+   least two seconds after release (2s hold + 0.2s fade). The .visible rule
+   has NO delay, so pressing Tab still shows it immediately — same two-state
+   trick WHIP uses for the inventory, applied here to the exit. */
+.sh-capsule.hb-cap {
+    transition: opacity 0.2s 2s var(--skin-ease), transform 0.2s 2s var(--skin-ease), bottom 0.25s var(--ui-ease);
+}
+
+#hotbar.visible .hb-cap {
+    transition: opacity 0.18s var(--skin-ease), transform 0.18s var(--skin-ease), bottom 0.25s var(--ui-ease);
+}
+
+/* The same two-second linger when the segment sits inside the hint capsule. */
+#ui-drawtext .hb-seg {
+    transition: max-width 0.2s 2s var(--skin-ease), max-height 0.2s 2s var(--skin-ease), opacity 0.2s 2s var(--skin-ease);
+}
+
+#ui-drawtext .hb-seg.open {
+    transition: max-width 0.3s var(--skin-ease), max-height 0.3s var(--skin-ease), opacity 0.2s var(--skin-ease);
+}
+
+.hb-slot::after {
+    border-radius: 11px;
+    border-width: 2px;
+    box-shadow: none;
+}
+
+.hb-core {
+    border-radius: 9px;
+}
+
+.hb-slot.empty::after {
+    border-color: var(--ui-border);
+}
+
+.hb-slot.active::after {
+    border-color: var(--ui-text);
+    box-shadow: none;
+}
+
+.hb-key {
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.10);
+    border-color: var(--ui-border);
+    color: var(--ui-text);
+}
+
+.hb-slot.empty .hb-key {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--ui-border);
+    color: var(--ui-text-dim);
+}
+
+.hb-slot.active .hb-key {
+    background: var(--ui-text);
+    border-color: var(--ui-text);
+    color: var(--ui-surface-solid);
+}
+
+.hb-count {
+    background: var(--ui-surface-solid);
+    border: 1px solid var(--ui-border);
+}
+
+#ui-drawtext .hb-div {
+    background: var(--ui-border);
+    border-radius: 1px;
+}
