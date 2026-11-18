@@ -4,6 +4,17 @@ All notable changes to this resource are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.3] - 2026-11-18
+
+### Fixed
+- The blur could remain fully applied after opening. `IS_SCREENBLUR_FADE_RUNNING`
+  turns false as soon as WHIP's 200 ms fade-in finishes -- at which point the blur
+  is already on screen -- and `TRIGGER_SCREENBLUR_FADE_OUT` can be refused while
+  that fade-in is animating. The resource now keeps a 450 ms suppression window
+  and retries `TriggerScreenblurFadeOut(0)` every frame, so a call always lands
+  after the fade-in. A backstop on `whip_core:ui:stateChanged` catches opens the
+  fade check misses, without touching the pause menu's own blur.
+
 ## [1.2.2] - 2026-11-18
 
 ### Changed

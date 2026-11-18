@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 name 'whip_inventory_compact'
-version '1.2.2'
+version '1.2.3'
 description 'Localized skin for the stock whip inventory (no renderer replaced)'
 author 'whip_inventory_compact contributors'
 repository 'https://github.com/OkanFeNwa/whip_inventory_compact'
