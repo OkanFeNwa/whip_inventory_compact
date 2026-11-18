@@ -4,6 +4,15 @@ All notable changes to this resource are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.2] - 2026-11-18
+
+### Changed
+- Replaced the every-frame `IsInventoryOpen()` export poll with a cheap native
+  fade-state check. The cross-resource export is now called only while a screen
+  blur fade is actually running, so the idle cost of the resource is near zero.
+  The watcher still covers local opens (F2, pad, radial, prompts/stashes) and
+  leaves the pause menu's own blur untouched.
+
 ## [1.2.1] - 2026-11-18
 
 ### Fixed
