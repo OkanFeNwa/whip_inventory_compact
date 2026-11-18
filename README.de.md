@@ -2,8 +2,9 @@
 
 Ein Skin für WHIPs Inventar. Er **ersetzt den Renderer nicht**: `whip_core` zeichnet weiterhin
 Slots, Drag & Drop, Tooltips, Menüs, Gewichte und die serverseitige Validierung. Diese Ressource
-fügt nur ein `theme.css`, ein kleines `client.lua` gegen den Spiel-Blur und einen
-Sprachumschalter mit einer Zeile hinzu.
+fügt nur ein `theme.css` und einen Sprachumschalter mit einer Zeile hinzu. Der Spiel-Blur wird durch
+eine gepatchte Zeile in `whip_core/client/inventory.lua` deaktiviert; nach jedem Core-Update mit
+`scripts/apply-blur-patch.ps1` erneut anwenden.
 
 Die vollständige Dokumentation auf Englisch und alle Prüfungen stehen in [README.md](README.md).
 

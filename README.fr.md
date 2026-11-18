@@ -2,8 +2,9 @@
 
 Skin pour l'inventaire de WHIP. Il **ne remplace pas le renderer** : `whip_core` dessine toujours
 les slots, le glisser-déposer, les infobulles, les menus, les poids et la validation serveur. Cette
-ressource ajoute seulement un `theme.css`, un petit `client.lua` qui annule le flou du jeu et un
-sélecteur de langue en une ligne.
+ressource ajoute seulement un `theme.css` et un sélecteur de langue en une ligne. Le flou du jeu est
+désactivé par une ligne patchée dans `whip_core/client/inventory.lua` ; réappliquez-le avec
+`scripts/apply-blur-patch.ps1` après chaque mise à jour du core.
 
 Voir [README.md](README.md) pour la documentation complète en anglais et les vérifications.
 

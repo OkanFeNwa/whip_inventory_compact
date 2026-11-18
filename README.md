@@ -2,9 +2,9 @@
 
 A skin for WHIP's stock inventory. It **does not replace the renderer**: `whip_core` still draws
 every slot, handles drag & drop, tooltips, menus, weights and server-side validation. The resource
-only applies a `theme.css` at startup through `Whip.register` + `SetActiveTheme`, plus a small
-`client.lua` that cancels the game blur while the inventory is open. No existing server file has
-been modified.
+only applies a `theme.css` at startup through `Whip.register` + `SetActiveTheme`. CSS cannot undo
+the native screen blur WHIP applies on open, so the installation also includes a one-line patch to
+`whip_core/client/inventory.lua`, with a script to re-apply it after every core update.
 
 No NUI page, no JavaScript and no copy of the renderer are shipped. The layout is CSS only: two
 equal columns, the left one continuous (title, accessories, player grid, Nearby, key hints), the
@@ -23,7 +23,8 @@ ensure whip_inventory_compact
 
 - `dependency 'whip_core'`, `@whip_core/lib/satellite.lua`, `config.lua` and `shared/locale.lua` are
   already in the manifest.
-- No changes to `whip_core` are required.
+- The one-line blur patch is applied to `whip_core/client/inventory.lua`. See **Blur and dimming**
+  below, and re-run `scripts/apply-blur-patch.ps1` after every `whip_core` update.
 - `server.lua` writes `locales/active.css` on start: the resource folder needs to be writable. If it
   is not, the committed Italian file is kept and a warning is printed in the F8 console.
 - `restart whip_inventory_compact` is required after editing `theme.css`, `config.lua` or the
@@ -111,12 +112,30 @@ everyone as soon as the resource starts:
 
 ### Blur and dimming
 
-WHIP calls `TriggerScreenblurFadeIn(200)` on open (`whip_core/client/inventory.lua:1062`). A theme
-cannot undo a game native, so `client.lua` registers the same three net events WHIP uses: our
-handlers run in the same tick, right after WHIP's, so no blurred frame is visible. Local opens (F2
-from cache, radial, pad) do not use a net event; a polling thread checks
-`exports.whip_core:IsInventoryOpen()` every frame while the inventory is open and calls
-`TriggerScreenblurFadeOut(1)`. Other screens that use blur are untouched.
+WHIP calls `TriggerScreenblurFadeIn(200)` on open. That native blurs the **game frame** behind the
+NUI page, so no CSS rule can remove it. Chasing it from this resource also fails: a client-side
+`FadeOut` either arrives one frame late (visible flash) or was refused while the fade-in was still
+animating. The reliable fix is to disable the call at its source.
+
+`whip_core/client/inventory.lua` is patched like this (the pause menu's own blur is untouched):
+
+```lua
+    -- [whip_inventory_compact blur patch] native inventory blur disabled; pause blur untouched.
+    -- Re-apply after a whip_core update with scripts/apply-blur-patch.ps1
+    -- TriggerScreenblurFadeIn(200)
+```
+
+After a `whip_core` update the original line comes back. Re-apply the patch from PowerShell, in the
+resource folder:
+
+```powershell
+.\scripts\apply-blur-patch.ps1          # apply (idempotent, makes a one-time backup)
+.\scripts\apply-blur-patch.ps1 -Status  # report patched / original
+.\scripts\apply-blur-patch.ps1 -Restore # put the original line back
+```
+
+The script finds `whip_core` anywhere under the same `resources` tree, or accepts `-CorePath`.
+Then `restart whip_core`. No client script ships with this resource, so idle CPU cost is zero.
 
 `#inv-wash` is forced to `background: transparent`, beating the inline color written by
 `inventory.js`, so there is no dark wash either. `#inv-ground-panel` is forced to stay visible when
@@ -131,7 +150,7 @@ WHIP opens a container.
 | `config.lua` | Locale selection and the five language blocks |
 | `shared/locale.lua` | Dot-path lookup with `en` → `it` fallback and `string.format` placeholders |
 | `server.lua` | Writes the locale CSS, then applies the theme for everyone with `Whip.register` |
-| `client.lua` | Cancels the native blur on open |
+| `scripts/apply-blur-patch.ps1` | Re-applies the one-line `whip_core` blur patch after core updates |
 | `fxmanifest.lua` | `dependency 'whip_core'`, shared scripts and served files |
 | `docs/screenshots/` | Preview images used in this README |
 
@@ -141,22 +160,16 @@ WHIP opens a container.
 
 ## Events
 
-| Name | Direction | Use |
-| --- | --- | --- |
-| `whip_core:client:openInventory` | net → client | Cancel the blur right after WHIP opens the inventory |
-| `whip_core:client:openPlayerInventory` | net → client | Same, for the player-owned inventory panel |
-| `whip_core:client:openPanel` | net → client | Same, for panels that can show the inventory |
-| `exports.whip_core:IsInventoryOpen()` | export, read-only | Per-frame poll for local opens (F2, radial, pad) |
-
-No new net event is registered for the layout: `theme.css` changes only the presentation of the DOM
-that `whip_core` already renders.
+No new net event is registered and no client script ships with this resource. `theme.css` changes
+only the presentation of the DOM that `whip_core` already renders; the blur patch is a commented
+line in the core itself.
 
 ## Configuration
 
 `config.lua` contains `Locale` and `Locales` (5 languages). `theme.css` contains the colors, sizes,
-`.inv-wrapper` columns, the animation easings and the import of `locales/active.css`. `client.lua`
-contains the open-event list and the polling interval. `fxmanifest.lua` declares `whip_core` as a
-dependency and serves both CSS files.
+`.inv-wrapper` columns, the animation easings and the import of `locales/active.css`.
+`fxmanifest.lua` declares `whip_core` as a dependency and serves both CSS files. The only change
+outside this folder is the one-line blur patch in `whip_core/client/inventory.lua`.
 
 Known limitation: WHIP appends static containers after the wallet, so if a wallet is opened first
 and a container second, the wallet stays above it in the DOM. Changing that order would require JS

@@ -2,8 +2,9 @@
 
 Skin per l'inventario di WHIP. **Non sostituisce il renderer**: `whip_core` continua a disegnare
 slot, drag & drop, tooltip, menu, pesi e validazione lato server. Questa risorsa aggiunge un
-`theme.css` (applicato a tutti tramite `SetActiveTheme`) e un piccolo `client.lua` che annulla il
-blur di gioco mentre l'inventario è aperto. Nessun file esistente è stato modificato.
+`theme.css` (applicato a tutti tramite `SetActiveTheme`). Il blur nativo di gioco viene disattivato
+con una riga patchata in `whip_core/client/inventory.lua`, riapplicabile con
+`scripts/apply-blur-patch.ps1` dopo ogni aggiornamento del core.
 
 Pacchetto pronto per GitHub: licenza MIT, changelog, screenshot e **5 lingue** (IT, EN, ES, FR, DE)
 con lo stesso meccanismo a una riga di `whip_clothingwheel`.
@@ -65,14 +66,21 @@ Documentazione: [Italiano](README.it.md) · [English](README.md) · [Español](R
   da 10px a 15px interni, piene e con contorno scuro; la **legenda dei tasti** da 11px a 15px, con
   keycap da 14px.
 - Zoom ridotto (`--ui-zoom-inventory: 1` invece di 1.32): molto meno "a tutto schermo".
-- **Nessun blur di sfondo**: WHIP chiama `TriggerScreenblurFadeIn(200)` all'apertura
-  (`whip_core/client/inventory.lua:1062`); essendo una native di FiveM e non CSS, il `theme.css`
-  non può annullarlo. Lo fa quindi il nostro `client.lua`: si registra sugli stessi eventi di rete
-  con cui WHIP apre l'inventario (i nostri handler girano subito dopo i suoi, nello stesso tick,
-  quindi non si vede nemmeno un frame), e intanto controlla l'export pubblico
-  `exports.whip_core:IsInventoryOpen()` (riga 2724) ogni frame per le aperture locali (F2 con
-  cache, radiale, pad). Richiama `TriggerScreenblurFadeOut(1)` solo mentre l'inventario è aperto.
-  Le altre schermate che usano blur restano intatte.
+- **Nessun blur di sfondo**: WHIP chiama `TriggerScreenblurFadeIn(200)` all'apertura. Essendo una
+  native di FiveM che sfoca il frame di gioco dietro alla pagina NUI, nessuna regola CSS può
+  annullarla. Anche agganciarla lato client lascia un frame di lampo o viene rifiutato durante il
+  fade-in. La chiamata viene quindi commentata direttamente nel core:
+
+  ```lua
+      -- [whip_inventory_compact blur patch] native inventory blur disabled; pause blur untouched.
+      -- Re-apply after a whip_core update with scripts/apply-blur-patch.ps1
+      -- TriggerScreenblurFadeIn(200)
+  ```
+
+  Dopo un aggiornamento di `whip_core` la riga torna: riesegui `scripts/apply-blur-patch.ps1`
+  dalla cartella della risorsa (`-Status` per controllare, `-Restore` per annullare), poi
+  `restart whip_core`. Il blur del menu pausa resta intatto e la risorsa non ha più alcuno
+  script client, quindi costo CPU a riposo zero.
 
 Nota: WHIP di default nasconde "Nearby" quando apri un contenitore (lo stile inline `display:none`
 viene scritto da `setPanels`). Il tema lo forza a restare visibile. I suoi riquadri sono disegnati
@@ -179,7 +187,7 @@ whip_inventory_compact/
 ├── config.lua           lingua + label
 ├── fxmanifest.lua
 ├── server.lua           genera locales/active.css e applica il tema
-├── client.lua           annulla il blur nativo
+├── scripts/apply-blur-patch.ps1   riapplica la patch blur sul core
 ├── theme.css            layout + import del CSS lingua
 ├── shared/locale.lua    loader con fallback
 ├── locales/active.css   generato (default: italiano)
@@ -250,11 +258,9 @@ Preview headless di WHIP a 1920x1080 con il tema iniettato:
   non esiste in game e si nasconde con `F9` nel preview (nei miei screenshot è rimossa).
 
 Per il blur la verifica è sul sorgente, non sul preview headless (che non esegue le native):
-`TriggerScreenblurFadeIn` / `FadeOut` in `inventory.lua:1062` / `:1358`, i tre eventi di rete
-che aprono l'UI (`:1485`, `:1708`, `:1760`) e l'export `IsInventoryOpen` alla riga 2724.
-Il lampo di un frame è stato eliminato registrando i nostri handler sugli stessi eventi: girano
-dopo quelli di WHIP perché la risorsa ha `dependency 'whip_core'`. **Va confermato in game** con
-`restart whip_inventory_compact` (serve il restart, non solo il ricaricamento del CSS).
+`TriggerScreenblurFadeIn` in `whip_core/client/inventory.lua` è commentato e marcato con
+`[whip_inventory_compact blur patch]`. `scripts/apply-blur-patch.ps1 -Status` riporta se la patch
+è attiva. Dopo la modifica serve `restart whip_core`, non solo il ricaricamento del CSS.
 
 ## Se qualcosa non torna
 

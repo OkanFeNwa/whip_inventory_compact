@@ -2,8 +2,9 @@
 
 Skin para el inventario de WHIP. **No sustituye al renderer**: `whip_core` sigue dibujando slots,
 arrastrar y soltar, tooltips, menús, pesos y la validación del servidor. Este recurso solo añade un
-`theme.css`, un pequeño `client.lua` que elimina el desenfoque del juego y un selector de idioma
-de una sola línea.
+`theme.css` y un selector de idioma de una sola línea. El desenfoque del juego se desactiva con una
+línea en `whip_core/client/inventory.lua`; vuelve a aplicarla con
+`scripts/apply-blur-patch.ps1` tras cada actualización del core.
 
 Consulta [README.md](README.md) para la documentación completa en inglés y las verificaciones.
 

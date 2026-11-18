@@ -4,6 +4,26 @@ All notable changes to this resource are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-11-18
+
+### Changed
+- The blur is now disabled at its source in `whip_core/client/inventory.lua`
+  instead of being chased from a client script. CSS cannot undo a game native,
+  and every client-side timing workaround left either a one-frame flash or a
+  permanent blur. The core call is commented out with a marked, idempotent patch;
+  the pause menu blur is untouched.
+- Removed `client.lua` and its manifest entry. The resource has no client script,
+  so its idle CPU cost is zero.
+
+### Added
+- `scripts/apply-blur-patch.ps1` re-applies the one-line core patch after every
+  `whip_core` update. It auto-detects the core under the same `resources` tree,
+  keeps a one-time backup, and supports `-Status` and `-Restore`.
+
+### Fixed
+- The 1.2.4 command hook could replace `whip_core`'s `inventory` command handler
+  and stop the inventory from opening. Removing the client script restores it.
+
 ## [1.2.4] - 2026-11-18
 
 ### Fixed
