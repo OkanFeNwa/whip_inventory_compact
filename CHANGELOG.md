@@ -4,6 +4,16 @@ All notable changes to this resource are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.4] - 2026-11-18
+
+### Fixed
+- Removed the final one-frame blur flash on the normal F2 / controller-pad open.
+  WHIP opens from the `inventory` and `whip_inventory_pad` commands; because it
+  is our dependency its handlers run first, so a second handler registered by
+  this resource cancels the blur in the same input dispatch, before the frame is
+  rendered. The frame-based watcher remains only as a fallback for the F1 radial
+  and prompt-driven stashes/gloveboxes.
+
 ## [1.2.3] - 2026-11-18
 
 ### Fixed

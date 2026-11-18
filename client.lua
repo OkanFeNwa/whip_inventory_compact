@@ -1,17 +1,13 @@
 -- WHIP applies a game-native screen blur every time the inventory opens:
 -- TriggerScreenblurFadeIn(200) in whip_core/client/inventory.lua:1091.
--- A theme.css cannot undo a game native, so this resource cancels it from OUR
--- side only. No whip_core file is touched: removing this client script (and its
+-- A theme.css cannot undo a game native -- CSS only paints the NUI page, the blur
+-- is a post-process on the GAME frame behind it. So this resource cancels it from
+-- our side. No whip_core file is touched: removing this client script (and its
 -- fxmanifest entry) restores the stock blur immediately.
 --
 -- WHIP itself uses duration 0 for an instant fade-out (client/pause.lua:395).
 -- TRIGGER_SCREENBLUR_FADE_OUT returns a BOOL: a call made while WHIP's 200ms
--- fade-IN is animating can be refused. Calling it once at the start of the fade
--- is therefore not enough. We hold a short suppression window and retry every
--- frame, so at least one call lands after the FadeIn has finished.
---
--- IS_SCREENBLUR_FADE_RUNNING becomes false once the fade is over -- but by then
--- the blur is fully applied. That is why the window must outlive the fade.
+-- fade-IN is animating can be refused, so we retry for a short window.
 
 local SUPPRESS_MS = 450   -- WHIP's fade is 200ms; generous headroom.
 local IS_SCREENBLUR_FADE_RUNNING = 0x7B226C785A52A0A9
@@ -29,8 +25,19 @@ local function startSuppression()
     suppressUntil = now + SUPPRESS_MS
 end
 
--- Server-pushed opens (stash, vehicle, admin inspect, panels). Fast path:
--- starts the window in the same tick instead of waiting for the watcher.
+-- SAME-TICK CANCELLATION (the actual fix for the one-frame flash).
+-- WHIP opens the inventory from these two commands. It is our dependency, so it
+-- registers its handlers first; ours run right after openUI() in the same input
+-- dispatch, i.e. BEFORE the frame is rendered. That removes the flash entirely.
+-- Toggling the inventory closed is harmless here: WHIP fades out anyway.
+for _, cmd in ipairs({ 'inventory', 'whip_inventory_pad' }) do
+    RegisterCommand(cmd, function()
+        startSuppression()
+        killBlur()
+    end, false)
+end
+
+-- Server-pushed opens (stash, vehicle, admin inspect, panels).
 local OPEN_EVENTS = {
     'whip_core:client:openInventory',
     'whip_core:client:openPlayerInventory',
@@ -40,9 +47,9 @@ for _, event in ipairs(OPEN_EVENTS) do
     RegisterNetEvent(event, startSuppression)
 end
 
--- F2, the pad, the F1 radial and prompt-driven stashes/gloveboxes are all LOCAL
--- and fire no net event. A single cheap native is all this thread does at idle;
--- the cross-resource export is called ONLY while a fade is animating.
+-- Fallback for the remaining LOCAL opens (F1 radial, prompt-driven stashes and
+-- gloveboxes) that fire no command we can hook. One cheap native at idle; the
+-- cross-resource export runs only while a fade is animating.
 CreateThread(function()
     while true do
         Wait(0)
@@ -60,9 +67,8 @@ CreateThread(function()
     end
 end)
 
--- Backstop. WHIP pushes this ~150ms after any screen opens; if the fade check
--- missed an open, this catches it. The guard keeps the pause menu's own blur
--- untouched.
+-- Backstop: WHIP pushes this ~150ms after any screen opens. The guard keeps the
+-- pause menu's own blur untouched.
 RegisterNetEvent('whip_core:ui:stateChanged', function(e)
     if not e or not e.open then return end
     local whip = exports.whip_core
