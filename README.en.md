@@ -43,7 +43,7 @@ No existing server file needs to be edited.
 ## GitHub package
 
 MIT `LICENSE`, `.gitignore`, `CHANGELOG.md`, screenshots in `docs/screenshots/`. Version `1.2.0`.
-Add your repository URL to `fxmanifest.lua` before publishing.
+Published at https://github.com/OkanFeNwa/whip_inventory_compact (`main`); the manifest already contains the `repository` field.
 
 ![Pockets](docs/screenshots/pockets.png)
 

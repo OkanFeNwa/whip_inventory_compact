@@ -6,7 +6,7 @@ name 'whip_inventory_compact'
 version '1.2.0'
 description 'Localized skin for the stock whip inventory (no renderer replaced)'
 author 'whip_inventory_compact contributors'
--- Add `repository 'https://github.com/<you>/whip_inventory_compact'` before publishing.
+repository 'https://github.com/OkanFeNwa/whip_inventory_compact'
 
 dependency 'whip_core'
 

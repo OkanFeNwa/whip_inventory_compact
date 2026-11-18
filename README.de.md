@@ -45,7 +45,7 @@ Den Ordner nach `resources/[custom]/whip_inventory_compact/` kopieren und
 ## GitHub-Paket
 
 MIT-`LICENSE`, `.gitignore`, `CHANGELOG.md` und Screenshots in `docs/screenshots/`. Version `1.2.0`.
-Vor dem Veröffentlichen die Repository-URL in `fxmanifest.lua` ergänzen.
+Veröffentlicht unter https://github.com/OkanFeNwa/whip_inventory_compact (Branch `main`); das Manifest enthält bereits das Feld `repository`.
 
 ![Taschen](docs/screenshots/pockets.png)
 

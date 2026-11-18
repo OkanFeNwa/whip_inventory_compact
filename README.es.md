@@ -44,7 +44,7 @@ No hace falta editar archivos existentes del servidor.
 ## Paquete para GitHub
 
 `LICENSE` MIT, `.gitignore`, `CHANGELOG.md` y capturas en `docs/screenshots/`. Versión `1.2.0`.
-Añade la URL de tu repositorio en `fxmanifest.lua` antes de publicar.
+Publicado en https://github.com/OkanFeNwa/whip_inventory_compact (rama `main`); el manifest ya incluye el campo `repository`.
 
 ![Bolsillos](docs/screenshots/pockets.png)
 

@@ -163,14 +163,16 @@ come override. In alternativa classica si può cambiare `Config.Theme` in `whip_
 
 ## Pacchetto GitHub
 
-La cartella è autonoma, non contiene file del server o di `whip_core` ed è pronta per un
-`git init` + push (non ho creato il `.git` per non annidare un repository dentro `resources/`):
+La cartella è autonoma, non contiene file del server o di `whip_core` ed è pubblicata su
+**https://github.com/OkanFeNwa/whip_inventory_compact** (branch `main`).
 
 ```
 whip_inventory_compact/
+├── .gitattributes
 ├── .gitignore
 ├── LICENSE              MIT
-├── README.md
+├── README.md            italiano + link alle altre 4 lingue
+├── README.en.md / README.es.md / README.fr.md / README.de.md
 ├── CHANGELOG.md
 ├── config.lua           lingua + label
 ├── fxmanifest.lua
@@ -184,9 +186,8 @@ whip_inventory_compact/
     └── stash.png
 ```
 
-Prima di pubblicare, aggiungi il tuo URL in `fxmanifest.lua` con
-`repository 'https://github.com/<tuo-utente>/whip_inventory_compact'`. Il `CHANGELOG.md` usa SemVer:
-questa release è `1.2.0`.
+`fxmanifest.lua` contiene già il campo `repository` con l'URL qui sopra. Il `CHANGELOG.md` usa
+SemVer: questa release è `1.2.0`.
 
 ![Inventario — tasche](docs/screenshots/pockets.png)
 
